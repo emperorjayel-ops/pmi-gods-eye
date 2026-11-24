@@ -1,0 +1,1256 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="dark" />
+<meta name="author" content="Created by OPS' Broker" />
+<meta name="description" content="PMI God's Eye — pmigodseye.genesis. Interactive member app pulled from Jay's GitHub Gods-Eye-2: live world view, member videos, HIIYAH member-to-admin talk, $20,000 scholarship & Excalibur test application, and a separate administrator back office. Demo: accounts, chat, videos and applications run in this session only." />
+<link rel="icon" href="data:," />
+<title>PMI God's Eye — pmigodseye.genesis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Source+Sans+3:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+  :root{
+    --bg:#0a0d13; --bg2:#10141f; --panel:#141926; --panel2:#191f30;
+    --line:#2a3147; --line-gold:#6b5a1e;
+    --gold:#d4af37; --gold-bright:#e8c766; --gold-dim:#9a842e;
+    --text:#eef0f4; --muted:#b9c0d0; --faint:#8b94a9;
+    --danger:#f0a8a8; --ok:#a8d8b0;
+    --radius:14px; --side-w:264px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:"Source Sans 3",system-ui,sans-serif;font-size:16px;line-height:1.55}
+  a{color:var(--gold-bright)}
+  h1,h2,h3{font-family:"Cinzel",serif;line-height:1.15;margin:0}
+  button,[role="button"],select,summary,input:not([type="checkbox"],[type="radio"]){min-height:2.25rem}
+  .demo-bar{position:sticky;top:0;z-index:60;background:#1a1405;border-bottom:1px solid var(--line-gold);padding:9px 16px;text-align:center;font-size:.86rem;font-weight:700;letter-spacing:.04em;color:var(--gold-bright)}
+  .demo-bar span{color:#fff;font-weight:600;letter-spacing:0}
+  .layout{display:flex;align-items:flex-start;max-width:1420px;margin:0 auto}
+  aside.sidebar{flex:0 0 var(--side-w);width:var(--side-w);position:sticky;top:42px;max-height:calc(100vh - 42px);overflow-y:auto;background:var(--bg2);border-right:1px solid var(--line);padding:20px 16px 28px}
+  .side-title{font-family:"Cinzel",serif;font-size:1.05rem;color:#fff;margin-bottom:4px}
+  .side-sub{font-size:.82rem;color:var(--faint);margin-bottom:16px}
+  .side-head{font-size:.72rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin:18px 0 8px}
+  .hub-banner{border:1px solid var(--line-gold);background:linear-gradient(180deg,#1c1708,#141926);border-radius:12px;padding:13px 12px;margin-bottom:12px}
+  .hub-banner .hub-kicker{font-size:.68rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:5px}
+  .hub-banner .hub-line{font-family:"Cinzel",serif;font-size:1.02rem;line-height:1.25;color:#fff}
+  .hub-banner .hub-line em{font-style:normal;color:var(--gold-bright)}
+  .hub-banner p{margin:7px 0 0;font-size:.84rem;line-height:1.45;color:var(--muted)}
+  .hub-mesh{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 8px 6px;margin-bottom:12px}
+  .hub-mesh svg{width:100%;height:auto;display:block}
+  .hub-mesh p{margin:6px 4px 4px;font-size:.74rem;line-height:1.4;color:var(--faint);text-align:center}
+  .app-link{display:block;text-decoration:none;border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:11px 12px;margin-bottom:8px;color:var(--text)}
+  .app-link:hover,.app-link:focus{border-color:var(--gold-dim)}
+  .app-link .app-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+  .app-link b{color:#fff;font-size:.97rem}
+  .app-link .app-domain{font-size:.76rem;font-weight:700;color:var(--gold-bright);word-break:break-all;margin-top:1px;display:block}
+  .app-link .app-desc{display:block;font-size:.83rem;line-height:1.4;color:var(--muted);margin-top:5px}
+  .app-link .app-links{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+  .app-link .app-links span{font-size:.68rem;font-weight:700;border:1px solid var(--line);border-radius:999px;padding:2px 7px;color:var(--faint);background:var(--bg2)}
+  .app-link .app-links span.on{border-color:var(--line-gold);color:var(--gold-bright)}
+  .app-link .go{display:inline-block;margin-top:9px;color:var(--gold-bright);font-size:.82rem;font-weight:700}
+  .app-link.current{border-color:var(--line-gold);background:#171307}
+  .connect-badge{flex:0 0 auto;font-size:.64rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;border-radius:999px;padding:3px 7px;border:1px solid var(--line-gold);color:var(--gold-bright);background:#241d08;white-space:nowrap}
+  .connect-badge.live{border-color:#33512c;color:var(--ok);background:#12240f}
+  .connect-badge.demo{border-color:var(--line);color:var(--faint);background:var(--panel2)}
+  .side-nav a{display:block;text-decoration:none;color:var(--muted);padding:7px 8px;border-radius:8px;font-size:.94rem;font-weight:600;min-height:2.25rem}
+  .side-nav a:hover,.side-nav a:focus{color:#0a0d13;background:var(--gold)}
+  .side-note{font-size:.8rem;color:var(--faint);border:1px dashed var(--line-gold);border-radius:10px;padding:10px;margin-top:14px}
+  main{flex:1 1 auto;min-width:0}
+  .wrap{max-width:960px;margin:0 auto;padding:0 18px 56px}
+  @media(max-width:900px){
+    .layout{flex-direction:column}
+    aside.sidebar{position:static;width:100%;flex:none;max-height:none;border-right:none;border-bottom:1px solid var(--line)}
+    .side-apps{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .side-apps .app-link{margin-bottom:0}
+    .side-nav{display:flex;flex-wrap:wrap;gap:4px}
+  }
+  @media(max-width:520px){.side-apps{grid-template-columns:1fr}}
+  header.hero{padding:34px 0 8px}
+  .eyebrow{font-size:.78rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:10px}
+  h1.title{font-size:clamp(2.1rem,6vw,3.3rem);font-weight:700;color:#fff}
+  h1.title em{font-style:normal;color:var(--gold-bright)}
+  .lede{margin:14px 0 0;max-width:740px;color:var(--muted);font-size:1.07rem}
+  .lede strong{color:var(--text)}
+  .hero-meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
+  .chip{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:7px 13px;font-size:.88rem;color:var(--muted)}
+  .chip b{color:var(--gold-bright);font-weight:700}
+  .chip.demo{border-color:var(--line-gold);color:var(--gold-bright);font-weight:700}
+  .eye-schematic{margin:26px 0 6px;background:linear-gradient(180deg,var(--bg2),var(--panel));border:1px solid var(--line);border-radius:var(--radius);padding:18px}
+  .eye-schematic svg{width:100%;height:auto;display:block}
+  .eye-schematic p{margin:10px 2px 0;font-size:.86rem;color:var(--faint)}
+  nav.tabs{display:flex;flex-wrap:wrap;gap:8px;margin:24px 0 4px;position:sticky;top:42px;z-index:15;background:var(--bg);padding:10px 0}
+  nav.tabs a{text-decoration:none;color:var(--muted);border:1px solid var(--line);background:var(--panel);padding:8px 14px;border-radius:999px;font-weight:600;font-size:.92rem;display:inline-flex;align-items:center;min-height:2.25rem}
+  nav.tabs a:hover,nav.tabs a:focus{color:#0a0d13;background:var(--gold);border-color:var(--gold)}
+  section{margin-top:36px;scroll-margin-top:118px}
+  .sec-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:16px}
+  .sec-head h2{font-size:1.55rem;color:#fff}
+  .sec-head .tag{font-size:.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);border:1px solid var(--line-gold);padding:3px 8px;border-radius:999px}
+  .sec-intro{color:var(--muted);max-width:760px;margin:0 0 16px}
+  .sec-intro strong{color:var(--text)}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  @media(max-width:820px){.grid,.grid3{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px}
+  .card h3{font-size:1.08rem;color:#fff;margin-bottom:8px;font-family:"Source Sans 3",sans-serif;font-weight:700}
+  .card p{margin:0 0 10px;color:var(--muted)}
+  .card p:last-child{margin-bottom:0}
+  .card .small{font-size:.88rem;color:var(--faint)}
+  .btn{appearance:none;border:1px solid var(--gold);background:var(--gold);color:#141005;font-weight:700;padding:10px 16px;border-radius:10px;cursor:pointer;font-size:.95rem;font-family:inherit;text-decoration:none;display:inline-block;text-align:center;min-height:2.75rem}
+  .btn:hover{background:var(--gold-bright);border-color:var(--gold-bright)}
+  .btn.secondary{background:transparent;color:var(--gold-bright)}
+  .btn.secondary:hover{background:#241d08}
+  .btn.danger{background:transparent;color:var(--danger);border-color:#5a2b2b}
+  .btn.danger:hover{background:#1d1010}
+  .btn.small{padding:7px 12px;font-size:.88rem;min-height:2.25rem}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .btn-row{display:flex;flex-wrap:wrap;gap:9px;margin-top:12px}
+  label{display:block;font-weight:700;font-size:.9rem;margin:14px 0 6px;color:var(--text)}
+  label:first-child{margin-top:0}
+  input[type=text],input[type=email],input[type=password],input[type=number],input[type=file],select,textarea{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;color:var(--text);padding:11px 12px;font:inherit;font-size:.96rem}
+  textarea{min-height:84px;resize:vertical}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--gold-dim);outline-offset:1px}
+  .field-help{font-size:.85rem;color:var(--faint);margin-top:5px}
+  .pill{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;border-radius:999px;padding:2px 8px;margin-left:8px;vertical-align:middle}
+  .pill.demo{background:#2a2107;color:var(--gold-bright);border:1px solid var(--line-gold)}
+  .pill.stub{background:var(--panel2);color:var(--faint);border:1px solid var(--line)}
+  .pill.ok{background:#12240f;color:var(--ok);border:1px solid #33512c}
+  .pill.wait{background:#241a08;color:#e8c766;border:1px solid var(--line-gold)}
+  .pill.bad{background:#1d1010;color:var(--danger);border:1px solid #5a2b2b}
+  .cred-box{background:var(--bg);border:1px dashed var(--line-gold);border-radius:10px;padding:11px 13px;font-size:.9rem;color:var(--muted);margin-top:12px}
+  .cred-box b{color:var(--gold-bright)}
+  .cred-box code{color:var(--gold-bright);word-break:break-all}
+  .note-box{background:#171307;border:1px solid var(--line-gold);border-radius:10px;padding:12px 14px;color:#e8ddb0;font-size:.94rem;margin-top:14px}
+  .note-box strong{color:var(--gold-bright)}
+  .warn{border:1px solid #5a2b2b;background:#1d1010;color:#f0c8c8;border-radius:10px;padding:11px 13px;font-size:.92rem;margin-top:12px}
+  .warn strong{color:#ffb3b3}
+  .output{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:13px;white-space:pre-wrap;word-break:break-word;font-size:.92rem;color:var(--muted);min-height:52px;margin-top:12px}
+  .output:empty::before{content:"Nothing here yet — it will appear here when you use the tool above.";color:var(--faint)}
+  .status{font-size:.92rem;margin-top:10px;color:var(--ok);min-height:1.3em}
+  .status.err{color:var(--danger)}
+  .kv{display:flex;justify-content:space-between;gap:14px;border-bottom:1px solid var(--line);padding:10px 0;font-size:.95rem}
+  .kv:last-child{border-bottom:none}
+  .kv .k{color:var(--muted)} .kv .v{color:var(--text);font-weight:600;text-align:right}
+  /* Map */
+  #eyeMap{height:420px;border-radius:12px;border:1px solid var(--line);background:#0d1220;z-index:1}
+  @media(max-width:520px){#eyeMap{height:340px}}
+  .leaflet-popup-content{color:#141926;font-family:"Source Sans 3",sans-serif}
+  .layer-row{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}
+  .layer-btn{appearance:none;border:1px solid var(--line);background:var(--panel2);color:var(--muted);border-radius:999px;padding:8px 14px;font:inherit;font-weight:700;font-size:.9rem;cursor:pointer;min-height:2.5rem}
+  .layer-btn.active{border-color:var(--gold);color:#141005;background:var(--gold)}
+  .place-list{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px}
+  @media(max-width:700px){.place-list{grid-template-columns:1fr}}
+  .place{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:13px 14px;cursor:pointer;text-align:left;color:var(--text);font:inherit;width:100%}
+  .place:hover,.place:focus{border-color:var(--gold-dim)}
+  .place b{color:#fff;display:block}
+  .place .pt{font-size:.74rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
+  .place p{margin:4px 0 0;color:var(--muted);font-size:.9rem}
+  /* Video */
+  .video-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+  @media(max-width:820px){.video-grid{grid-template-columns:1fr}}
+  .video-card{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .video-frame{aspect-ratio:16/9;background:#000}
+  .video-frame iframe,.video-frame video{width:100%;height:100%;border:0;display:block}
+  .video-body{padding:13px 15px}
+  .video-body b{color:#fff;display:block;font-size:1rem}
+  .video-body p{margin:4px 0 0;color:var(--muted);font-size:.9rem}
+  .video-body .by{font-size:.8rem;color:var(--faint);margin-top:6px}
+  .empty-slot{border:1.5px dashed var(--line-gold);background:#12100a;border-radius:var(--radius);padding:26px 20px;text-align:center}
+  .empty-slot .slot-title{font-family:"Cinzel",serif;font-size:1.2rem;color:var(--gold-bright);margin-bottom:8px}
+  .empty-slot p{color:var(--muted);margin:0 auto;max-width:520px}
+  /* Chat */
+  .chat-log{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px;min-height:170px;max-height:300px;overflow-y:auto}
+  .chat-msg{margin-bottom:10px;max-width:88%}
+  .chat-msg .who{font-weight:700;color:var(--gold-bright);font-size:.82rem}
+  .chat-msg .what{color:var(--text);background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:8px 11px;margin-top:2px;word-break:break-word}
+  .chat-msg.me{margin-left:auto;text-align:right}
+  .chat-msg.me .who{color:#fff}
+  .chat-msg.me .what{background:#241d08;border-color:var(--line-gold);text-align:left}
+  .chat-msg .when{font-size:.72rem;color:var(--faint);margin-top:2px}
+  .cam-box{background:#000;border:1px solid var(--line);border-radius:12px;overflow:hidden;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;position:relative}
+  .cam-box video{width:100%;height:100%;object-fit:cover;display:none}
+  .cam-box .placeholder{color:var(--faint);text-align:center;padding:16px;font-size:.94rem}
+  .cam-tag{position:absolute;top:10px;left:10px;background:rgba(10,13,19,.85);border:1px solid var(--line-gold);color:var(--gold-bright);font-size:.72rem;font-weight:700;letter-spacing:.08em;padding:3px 9px;border-radius:999px;z-index:2}
+  /* Queues */
+  .queue-item{border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-top:10px;background:var(--bg)}
+  .queue-item b{color:#fff}
+  .queue-item p{margin:4px 0;color:var(--muted);font-size:.92rem;white-space:pre-wrap;word-break:break-word}
+  .queue-item .qactions{display:flex;flex-wrap:wrap;gap:8px;margin-top:9px}
+  .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  @media(max-width:820px){.stat-grid{grid-template-columns:1fr 1fr}}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;text-align:center}
+  .stat .n{font-family:"Cinzel",serif;font-size:1.7rem;color:var(--gold-bright)}
+  .stat .l{font-size:.8rem;color:var(--faint);font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+  .steps{counter-reset:step;list-style:none;margin:0;padding:0}
+  .steps li{counter-increment:step;padding:10px 0 10px 44px;position:relative;border-bottom:1px solid var(--line);color:var(--muted)}
+  .steps li:last-child{border-bottom:none}
+  .steps li::before{content:counter(step);position:absolute;left:0;top:8px;width:30px;height:30px;border-radius:50%;border:1px solid var(--line-gold);color:var(--gold-bright);font-weight:700;display:flex;align-items:center;justify-content:center}
+  .steps b{color:#fff}
+  .mesh-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  @media(max-width:820px){.mesh-grid{grid-template-columns:1fr 1fr}}
+  @media(max-width:520px){.mesh-grid{grid-template-columns:1fr}}
+  .mesh-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px}
+  .mesh-card h3{font-family:"Source Sans 3",sans-serif;font-size:1rem;color:#fff;margin-bottom:4px}
+  .mesh-card .dom{font-size:.82rem;font-weight:700;color:var(--gold-bright);word-break:break-all}
+  .mesh-card p{margin:7px 0 0;color:var(--muted);font-size:.92rem}
+  .hidden{display:none !important}
+  footer{margin-top:52px;border-top:1px solid var(--line);padding-top:22px;text-align:center;color:var(--faint);font-size:.92rem}
+  footer .credit{color:var(--gold-bright);font-weight:700;font-size:1rem}
+  footer p{margin:6px 0}
+  @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<div class="demo-bar">INTERACTIVE DEMO &nbsp;·&nbsp; <span>Accounts, videos, HIIYAH talk, scholarship applications &amp; the back office all work in this session — nothing is saved when the page closes, and no live payment or telecom connection is attached yet</span></div>
+
+<div class="layout">
+
+  <aside class="sidebar" aria-label="All apps in the compilation and sections in this app">
+    <div class="side-title">PMI God's Eye</div>
+    <div class="side-sub">pmigodseye.genesis · Interactive demo · Session only</div>
+
+    <div class="side-head">The Compilation — All Apps Connected</div>
+
+    <div class="hub-banner">
+      <div class="hub-kicker">One network · Every app · Every sidebar</div>
+      <div class="hub-line">I'm on <em>everybody's app.</em><br>Everybody's on <em>my app.</em></div>
+      <p>God's Eye is one door in a compilation. From this sidebar you step into any other app, and from any other app's sidebar you step straight back here.</p>
+    </div>
+
+    <div class="hub-mesh" aria-hidden="true">
+      <svg viewBox="0 0 220 118" role="img" aria-label="All apps connected to each other">
+        <g stroke="#d4af37" stroke-opacity=".5" stroke-width="1.2">
+          <line x1="110" y1="59" x2="38" y2="22"/><line x1="110" y1="59" x2="182" y2="22"/>
+          <line x1="110" y1="59" x2="38" y2="96"/><line x1="110" y1="59" x2="182" y2="96"/>
+          <line x1="38" y1="22" x2="182" y2="22"/><line x1="38" y1="96" x2="182" y2="96"/>
+          <line x1="38" y1="22" x2="38" y2="96"/><line x1="182" y1="22" x2="182" y2="96"/>
+          <line x1="38" y1="22" x2="182" y2="96"/><line x1="182" y1="22" x2="38" y2="96"/>
+        </g>
+        <g fill="#0a0d13" stroke="#d4af37" stroke-width="1.6">
+          <circle cx="110" cy="59" r="13"/><circle cx="38" cy="22" r="8"/><circle cx="182" cy="22" r="8"/>
+          <circle cx="38" cy="96" r="8"/><circle cx="182" cy="96" r="8"/>
+        </g>
+        <circle cx="110" cy="59" r="5" fill="#e8c766"/>
+        <g fill="#eef0f4" font-family="Source Sans 3, sans-serif" font-size="7.5" font-weight="700" text-anchor="middle">
+          <text x="110" y="62">GE</text><text x="38" y="25">EX</text><text x="182" y="25">FS</text>
+          <text x="38" y="99">HI</text><text x="182" y="99">DN</text>
+        </g>
+      </svg>
+      <p>Every app connects to every other app — not just back to a home page.</p>
+    </div>
+
+    <div class="side-apps">
+      <span class="app-link current">
+        <span class="app-top"><b>PMIGodsEye — God's Eye</b><span class="connect-badge">You are here</span></span>
+        <span class="app-domain">pmigodseye.genesis</span>
+        <span class="app-desc">World view, member videos, HIIYAH talk, the $20,000 scholarship &amp; the Excalibur test — the app you're in now.</span>
+        <span class="app-links"><span class="on">→ Excalibur</span><span class="on">→ FinSwap</span><span class="on">→ HIIYAH</span><span class="on">→ Dominion</span></span>
+        <br><span class="go">Current app — connects out to all</span>
+      </span>
+
+      <a class="app-link" href="https://muse.ai/s/excalibur-line-app-nk6xexwxvwguvv/mSyxWapQQtQPVyKTwmXxm6HsWr5f4I8KsvBl5BM8Mjo" target="_blank" rel="noopener">
+        <span class="app-top"><b>Excalibur Line</b><span class="connect-badge live">Open →</span></span>
+        <span class="app-domain">excaliburline.token</span>
+        <span class="app-desc">The Line — Fort Valley · School · Factory · Sky Hub. Its sidebar carries God's Eye, FinSwap, HIIYAH &amp; Dominion the same way.</span>
+        <span class="app-links"><span>→ God's Eye</span><span>→ FinSwap</span><span>→ HIIYAH</span><span>→ Dominion</span></span>
+        <br><span class="go">Connect to Excalibur Line →</span>
+      </a>
+
+      <a class="app-link" href="https://muse.ai/s/finswap-crypto-exchange-vo6xf1xt5uz1xp/bNkQGV6FZR9aZGmdMN8GuDrrW027KvtZxM4-Co8LOPg" target="_blank" rel="noopener">
+        <span class="app-top"><b>FinSwap</b><span class="connect-badge live">Open →</span></span>
+        <span class="app-domain">finswap.token</span>
+        <span class="app-desc">Exchange, gold &amp; Bitcoin — where the $50 scholarship test fee is paid in Bitcoin. Its sidebar carries every other app back to here.</span>
+        <span class="app-links"><span>→ God's Eye</span><span>→ Excalibur</span><span>→ HIIYAH</span><span>→ Dominion</span></span>
+        <br><span class="go">Connect to FinSwap →</span>
+      </a>
+
+      <a class="app-link" href="#hiyah">
+        <span class="app-top"><b>HIIYAH</b><span class="connect-badge demo">Talk here</span></span>
+        <span class="app-domain">Domain to be picked — no HIIYAH name on Jay's list yet</span>
+        <span class="app-desc">Telecom — eSIM &amp; EarthNet. In God's Eye, HIIYAH is the line members use to talk to administrators, right inside this app.</span>
+        <span class="app-links"><span>→ God's Eye</span><span>→ Excalibur</span><span>→ FinSwap</span><span>→ Dominion</span></span>
+        <br><span class="go">Open HIIYAH talk in this app →</span>
+      </a>
+
+      <a class="app-link" href="#connected">
+        <span class="app-top"><b>Dominion Network</b><span class="connect-badge demo">In compilation</span></span>
+        <span class="app-domain">dominionnetwork.metaverse</span>
+        <span class="app-desc">Media, chat &amp; streaming, in partnership with the CEO Network, Bahamas. Present in this sidebar, and God's Eye is present in Dominion's.</span>
+        <span class="app-links"><span>→ God's Eye</span><span>→ Excalibur</span><span>→ FinSwap</span><span>→ HIIYAH</span></span>
+        <br><span class="go">See how Dominion connects →</span>
+      </a>
+    </div>
+
+    <div class="side-head">In This App</div>
+    <nav class="side-nav">
+      <a href="#worldview">God's Eye World View</a>
+      <a href="#videos">Video Library</a>
+      <a href="#membership">Membership &amp; Logins</a>
+      <a href="#hiyah">HIIYAH — Talk to Admin</a>
+      <a href="#scholarship">Scholarship &amp; Academy</a>
+      <a href="#apply">Apply — $20,000 Scholarship</a>
+      <a href="#backoffice">Back Office (Admin)</a>
+      <a href="#connected">All Apps Connected</a>
+      <a href="#opensource">GitHub &amp; Open Source</a>
+      <a href="#report">Report a Problem</a>
+    </nav>
+    <div class="side-note"><strong style="color:var(--gold-bright)">How the compilation works:</strong> pick any app above and you land in that app — its sidebar has this same list, so you can keep moving app-to-app without ever going back to a start page. Excalibur Line and FinSwap open on their public links. HIIYAH talk runs inside this app below; Dominion opens the Connected section until its updated public link is re-shared — no address has been invented for it.</div>
+  </aside>
+
+  <main>
+  <div class="wrap">
+
+  <header class="hero" id="top">
+    <div class="eyebrow">PMI God's Eye · Pulled from GitHub — Gods-Eye-2 · Interactive Member App</div>
+    <h1 class="title">PMI <em>God's Eye</em></h1>
+    <p class="lede">God's Eye is the seeing arm of Jay's family of apps — <strong>one world view over Fort Valley, the Academy, the Line, and the network</strong> — rebuilt from the <strong>Gods-Eye-2</strong> project on Jay's GitHub as a working, interactive app, not a static page. Members <strong>add their own videos</strong>, <strong>talk directly to administrators through HIIYAH</strong> from their membership account, and <strong>apply here for the $20,000 scholarship</strong> by taking the God's Eye test — the Excalibur test. Administrators run it all from a <strong>separate back office with its own login</strong>, the same member-vs-administrator protocol as Excalibur Line and FinSwap.</p>
+    <div class="hero-meta">
+      <span class="chip demo">INTERACTIVE DEMO — SESSION ONLY</span>
+      <span class="chip"><b>Front domain</b>&nbsp; pmigodseye.genesis</span>
+      <span class="chip"><b>Source</b>&nbsp; github.com/emperorjayel-ops/Gods-Eye-2</span>
+      <span class="chip"><b>Scholarship</b>&nbsp; $20,000 · Test fee $50 in Bitcoin</span>
+      <span class="chip"><b>Talk</b>&nbsp; Members ↔ Admins via HIIYAH</span>
+    </div>
+
+    <div class="eye-schematic" aria-hidden="true">
+      <svg viewBox="0 0 900 210" role="img" aria-label="God's Eye over the network">
+        <ellipse cx="450" cy="105" rx="330" ry="86" fill="none" stroke="#d4af37" stroke-opacity=".55" stroke-width="2"/>
+        <ellipse cx="450" cy="105" rx="215" ry="56" fill="none" stroke="#d4af37" stroke-opacity=".35" stroke-width="1.5"/>
+        <circle cx="450" cy="105" r="34" fill="#0a0d13" stroke="#d4af37" stroke-width="2"/>
+        <circle cx="450" cy="105" r="13" fill="#e8c766"/>
+        <g stroke="#d4af37" stroke-opacity=".45" stroke-width="1.2">
+          <line x1="450" y1="105" x2="150" y2="42"/><line x1="450" y1="105" x2="752" y2="42"/>
+          <line x1="450" y1="105" x2="150" y2="168"/><line x1="450" y1="105" x2="752" y2="168"/>
+        </g>
+        <g fill="#0a0d13" stroke="#d4af37" stroke-width="1.6">
+          <circle cx="150" cy="42" r="9"/><circle cx="752" cy="42" r="9"/>
+          <circle cx="150" cy="168" r="9"/><circle cx="752" cy="168" r="9"/>
+        </g>
+        <g fill="#b9c0d0" font-family="Source Sans 3, sans-serif" font-size="13" text-anchor="middle">
+          <text x="150" y="24">Fort Valley HQ</text><text x="752" y="24">Dominion · Bahamas</text>
+          <text x="150" y="196">The Academy</text><text x="752" y="196">Las Vegas Connection</text>
+          <text x="450" y="160" fill="#e8c766" font-weight="700">GOD'S EYE</text>
+        </g>
+      </svg>
+      <p>The Eye over the whole family: Fort Valley headquarters, the school and Academy being built, Dominion Network in the Bahamas, and the Las Vegas connection — all watched from one place, all reachable from the sidebar.</p>
+    </div>
+
+    <nav class="tabs" aria-label="Jump to a section">
+      <a href="#worldview">World View</a>
+      <a href="#videos">Videos</a>
+      <a href="#membership">Logins</a>
+      <a href="#hiyah">HIIYAH Talk</a>
+      <a href="#scholarship">Scholarship</a>
+      <a href="#backoffice">Back Office</a>
+    </nav>
+  </header>
+
+  <!-- ============ WORLD VIEW ============ -->
+  <section id="worldview">
+    <div class="sec-head"><h2>God's Eye World View</h2><span class="tag">Interactive · Leaflet + OpenStreetMap</span></div>
+    <p class="sec-intro">A working world view built on <strong>Leaflet</strong>, the proven open-source mapping library, over <strong>OpenStreetMap</strong> — the same open-source approach as the God's Eye View projects on GitHub. Pan it, zoom it, switch the layers, and tap any place to see what the Eye sees there. The places below are Jay's real network points; the view itself is live map data, loaded fresh when the page opens.</p>
+
+    <div class="layer-row" role="group" aria-label="Map layers">
+      <button type="button" class="layer-btn active" data-layer="all">All places</button>
+      <button type="button" class="layer-btn" data-layer="home">Home ground — Georgia</button>
+      <button type="button" class="layer-btn" data-layer="network">The network</button>
+      <button type="button" class="layer-btn" data-layer="school">School &amp; Academy</button>
+    </div>
+
+    <div id="eyeMap" role="application" aria-label="Interactive God's Eye map"></div>
+    <p class="status" id="mapStatus" aria-live="polite"></p>
+
+    <div class="place-list" id="placeList"></div>
+
+    <div class="note-box"><strong>What the Eye watches:</strong> Fort Valley, Georgia is home ground — headquarters, the Factory, the school and the Academy, and the Excalibur Line running Fort Valley → School → Factory → Sky Hub. The network reaches to the Bahamas (Dominion Network with the CEO Network) and to Las Vegas (the Excalibur Line connection). Pick a card above the map list — or a pin on the map — and the Eye flies you there.</div>
+  </section>
+
+  <!-- ============ VIDEOS ============ -->
+  <section id="videos">
+    <div class="sec-head"><h2>Video Library</h2><span class="tag">Members add videos</span></div>
+    <p class="sec-intro">Not a static gallery — <strong>members add videos right here</strong> and they play right here. Paste a YouTube or Vimeo link, a direct video file link (.mp4 / .webm), or choose a video file from your device. New videos appear in the library instantly for this session and land in the administrator's review queue in the Back Office.</p>
+
+    <div class="video-grid" id="videoGrid"></div>
+    <div class="empty-slot" id="videoEmpty">
+      <div class="slot-title">The library is open — be the first to add a video</div>
+      <p>Use the form below. Anything you add plays in this library for the rest of this session, credited to your member name.</p>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h3>Add a video</h3>
+      <form id="videoForm" autocomplete="off">
+        <label for="vidTitle">Video title</label>
+        <input type="text" id="vidTitle" placeholder="e.g. Fort Valley — the Line over Main Street" required />
+        <label for="vidUrl">Video link (YouTube, Vimeo, or a direct .mp4 / .webm link)</label>
+        <input type="text" id="vidUrl" placeholder="https://…" />
+        <label for="vidFile">…or choose a video file from your device</label>
+        <input type="file" id="vidFile" accept="video/*" />
+        <p class="field-help">A file you choose plays from your device for this session only — it is not uploaded anywhere. A link you paste is embedded from its own host.</p>
+        <label for="vidDesc">What is this video? (shown under it)</label>
+        <textarea id="vidDesc" placeholder="A line or two about what we're watching"></textarea>
+        <div class="btn-row">
+          <button class="btn" type="submit">Add to the library</button>
+          <button class="btn secondary" type="button" id="vidSample">Try it with a sample link</button>
+        </div>
+        <p class="status" id="vidMsg" aria-live="polite"></p>
+      </form>
+      <p class="small" style="color:var(--faint)">Posting as: <b id="vidAs" style="color:var(--gold-bright)">Guest (sign in to post as a member)</b>. Administrators can feature or remove any video from the Back Office.</p>
+    </div>
+  </section>
+
+  <!-- ============ MEMBERSHIP / LOGINS ============ -->
+  <section id="membership">
+    <div class="sec-head"><h2>Membership &amp; Logins</h2><span class="tag">Two separate doors</span></div>
+    <p class="sec-intro">The same protocol as Excalibur Line and FinSwap: <strong>a Member door and an Administrator door, kept separate</strong>. A member login cannot open the back office, and an administrator login is not a member account. <strong>Jay holds administrator access</strong> — administrators join by an invite Jay approves, generated in the Back Office. Passwords are checked as SHA-256 hashes in your browser, never kept in plain text, and every account here lives in memory for this session only.</p>
+
+    <div class="card" style="margin-bottom:14px">
+      <h3>All login info <span class="pill demo">Demo only</span></h3>
+      <div class="kv"><span class="k">Member — demo account</span><span class="v"><code>member@demo.local</code> · password <code>EyeDemo2027</code> → Member dashboard</span></div>
+      <div class="kv"><span class="k">Administrator — Jay's demo door</span><span class="v"><code>admin@demo.local</code> · password <code>AdminDemo2027</code> → Back Office</span></div>
+      <div class="kv"><span class="k">New member</span><span class="v">No shared password — create your own in Sign Up below</span></div>
+      <div class="kv"><span class="k">Approved administrator</span><span class="v">Invite code from Jay — sign up as “Administrator (invited)”</span></div>
+      <p class="small">These demo passwords are printed here on purpose, for the demo only. The live app will never display passwords — members set their own, and administrators join by invite only.</p>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h3>Member Login</h3>
+        <form id="memberForm" autocomplete="off">
+          <label for="mEmail">Member email</label>
+          <input type="email" id="mEmail" placeholder="member@demo.local" required />
+          <label for="mPass">Password</label>
+          <input type="password" id="mPass" placeholder="Your member password" required />
+          <div class="btn-row"><button class="btn" type="submit">Sign in as Member</button></div>
+          <p class="status" id="mMsg" aria-live="polite"></p>
+        </form>
+        <div class="cred-box"><b>Demo member login:</b><br>Email: <code>member@demo.local</code><br>Password: <code>EyeDemo2027</code><br>Demo account — it holds no real data and no real funds.</div>
+      </div>
+
+      <div class="card">
+        <h3>Administrator Login</h3>
+        <form id="adminForm" autocomplete="off">
+          <label for="aEmail">Administrator email</label>
+          <input type="email" id="aEmail" placeholder="admin@demo.local" required />
+          <label for="aPass">Administrator password</label>
+          <input type="password" id="aPass" placeholder="Your administrator password" required />
+          <div class="btn-row"><button class="btn" type="submit">Sign in as Administrator</button></div>
+          <p class="status" id="aMsg" aria-live="polite"></p>
+        </form>
+        <div class="cred-box"><b>Demo administrator login (Jay's door):</b><br>Email: <code>admin@demo.local</code><br>Password: <code>AdminDemo2027</code><br>Separate role from members — opens the Back Office below.</div>
+      </div>
+    </div>
+
+    <div class="card hidden" id="memberDash" style="margin-top:14px">
+      <h3>Member Dashboard <span class="pill ok">Signed in</span></h3>
+      <p>Welcome, <b id="memberName" style="color:#fff">Member</b>. Everything below is your activity in this session.</p>
+      <div class="kv"><span class="k">Your videos in the library</span><span class="v" id="dashVideos">None yet — add one above</span></div>
+      <div class="kv"><span class="k">Your HIIYAH messages to admin</span><span class="v" id="dashMsgs">None yet</span></div>
+      <div class="kv"><span class="k">Your scholarship application</span><span class="v" id="dashApp">Not started — apply below</span></div>
+      <div class="btn-row">
+        <button class="btn secondary" type="button" data-jump="#hiyah">Talk to admin on HIIYAH</button>
+        <button class="btn secondary" type="button" data-jump="#apply">Scholarship application</button>
+        <button class="btn danger" type="button" id="memberOut">Sign out</button>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <h3>Sign Up — create your account</h3>
+      <form id="signupForm" autocomplete="off">
+        <div class="grid">
+          <div>
+            <label for="suName">Your name</label>
+            <input type="text" id="suName" placeholder="Full name" required />
+          </div>
+          <div>
+            <label for="suEmail">Email</label>
+            <input type="email" id="suEmail" placeholder="you@example.com" required />
+          </div>
+        </div>
+        <label for="suPass">Choose a password (at least 6 characters)</label>
+        <input type="password" id="suPass" placeholder="Choose a password" required />
+        <label for="suRole">Account type</label>
+        <select id="suRole">
+          <option value="member">Member</option>
+          <option value="admin">Administrator (invited)</option>
+        </select>
+        <div id="inviteWrap" class="hidden">
+          <label for="suInvite">Admin invite code</label>
+          <input type="text" id="suInvite" placeholder="Invite code Jay sent you" />
+          <p class="field-help">Use the exact email the invite was sent to, plus this code. No code, no admin account — Jay approves every administrator.</p>
+        </div>
+        <div class="btn-row"><button class="btn" type="submit">Create account</button></div>
+        <p class="status" id="suMsg" aria-live="polite"></p>
+      </form>
+    </div>
+  </section>
+
+  <!-- ============ HIIYAH TALK ============ -->
+  <section id="hiyah">
+    <div class="sec-head"><h2>HIIYAH — Talk to Administration</h2><span class="tag">Member ↔ Admin · Working chat</span></div>
+    <p class="sec-intro">This is the line Jay asked for: <strong>from your membership account, inside this app, you talk directly to the administrators — through HIIYAH</strong>, the family's telecom app (the HIIYAH eSIM codebase is what lives in the Gods-Eye-2 GitHub repo). Type below and your message lands in the administrator's HIIYAH inbox in the Back Office; when an admin replies there, the reply appears right here in your thread. Try both sides: sign in as the demo member, send a message, then sign in as administrator and answer it from the Back Office.</p>
+
+    <div class="grid">
+      <div class="card">
+        <h3>Your conversation <span class="pill ok" id="chatState">Live in this session</span></h3>
+        <p class="small" style="color:var(--faint);margin-top:0">Talking as: <b id="chatAs" style="color:var(--gold-bright)">Guest</b> — sign in as a member above so admins know who they're talking to.</p>
+        <div class="chat-log" id="chatLog" aria-live="polite"></div>
+        <form id="chatForm" autocomplete="off" style="margin-top:12px">
+          <label for="chatInput">Message to administration</label>
+          <textarea id="chatInput" placeholder="Write to the God's Eye administrators…" required></textarea>
+          <div class="btn-row">
+            <button class="btn" type="submit">Send via HIIYAH</button>
+            <button class="btn secondary" type="button" id="chatQuick">Quick message: “Checking in”</button>
+          </div>
+          <p class="status" id="chatMsg" aria-live="polite"></p>
+        </form>
+      </div>
+
+      <div class="card">
+        <h3>HIIYAH video — see who you're talking to</h3>
+        <div class="cam-box">
+          <span class="cam-tag">HIIYAH · YOUR CAMERA</span>
+          <video id="camVideo" autoplay playsinline muted></video>
+          <div class="placeholder" id="camPlaceholder">Your camera is off.<br>Turn it on to preview yourself exactly as an administrator will see you on a HIIYAH video call.</div>
+        </div>
+        <div class="btn-row">
+          <button class="btn" type="button" id="camOn">Turn camera on</button>
+          <button class="btn secondary" type="button" id="camOff" disabled>Turn camera off</button>
+        </div>
+        <p class="status" id="camMsg" aria-live="polite"></p>
+        <p class="small">The camera preview is real — it runs on your own device, in your browser, and nothing is recorded or sent anywhere. <b style="color:var(--text)">Live HIIYAH calling between members and admins connects when the HIIYAH telecom partner service is attached</b> — that connection does not exist yet, so calls are not faked here. Text talk above works now, in-session.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SCHOLARSHIP & ACADEMY ============ -->
+  <section id="scholarship">
+    <div class="sec-head"><h2>Scholarship &amp; the Academy</h2><span class="tag">$20,000 scholarship</span></div>
+    <p class="sec-intro">God's Eye carries the scholarship program and the school behind it. This is the program as Jay has set it out — the application below is real and working; the detailed test instructions are Jay's to send and are marked where they will go.</p>
+
+    <div class="grid3">
+      <div class="card">
+        <h3>The School Being Built</h3>
+        <p>A school is being built on home ground in <b style="color:var(--text)">Fort Valley, Georgia</b> — part of the same build as the Factory and the Excalibur Line, with the Line's route running Fort Valley → School → Factory → Sky Hub.</p>
+        <p>The God's Eye scholarship is how students get in on it: apply here, take the test, and the award helps carry you through the program.</p>
+      </div>
+      <div class="card">
+        <h3>The Academy &amp; Certification</h3>
+        <p>Through the Academy, people <b style="color:var(--text)">get certified — and once certified, they can certify others</b>. Certification is a chain: each person who earns it can bring the next person up to the same standard.</p>
+        <p>Scholarship recipients enter that chain through the Academy program tied to the school being built.</p>
+      </div>
+      <div class="card">
+        <h3>The Excalibur Test</h3>
+        <p>The way in is the <b style="color:var(--text)">God's Eye test — the Excalibur test</b>. The test is about the device: <b style="color:var(--text)">scholarships worth $20,000 are awarded to people who can activate the device with their left hand or their right hand</b>.</p>
+        <p>The device doesn't work for everybody — that's the test. If you can activate it, left or right, you qualify for the award.</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <h3>How it works</h3>
+      <ol class="steps">
+        <li><b>Apply on this app</b> — fill in the application below. It takes two minutes.</li>
+        <li><b>Pay the $50 application fee in Bitcoin</b> — the fee is the price of taking the God's Eye test. It is paid in Bitcoin through FinSwap / Bitcoin, the same way Jay's other apps handle Bitcoin payments (demo-labeled below until a live payment integration is in place).</li>
+        <li><b>Take the Excalibur test</b> — activate the device with your left hand or your right hand. Detailed test instructions are being sent by Jay and will be posted in the space marked below — the application flow is ready for them now.</li>
+        <li><b>The $20,000 scholarship</b> — awarded to applicants who can activate the device. Awards are decided by administration in the Back Office, where every application lands.</li>
+      </ol>
+      <div class="note-box"><strong>Detailed Excalibur test information — coming from Jay:</strong> the full test instructions (device, procedure, scheduling) will be filled in here exactly as Jay sends them. Nothing about the test beyond what is stated above has been invented or filled in.</div>
+    </div>
+  </section>
+
+  <!-- ============ APPLY ============ -->
+  <section id="apply">
+    <div class="sec-head"><h2>Apply — $20,000 Scholarship</h2><span class="tag">Working application</span></div>
+    <p class="sec-intro">Fill it in, review your payment slip for the <strong>$50 Bitcoin test fee</strong>, log your fee payment, and submit. Your application gets a number, a copy you can download and keep, and a place in the administrator's review queue in the Back Office.</p>
+
+    <div class="card">
+      <form id="appForm" autocomplete="off">
+        <div class="grid">
+          <div>
+            <label for="apName">Full name</label>
+            <input type="text" id="apName" placeholder="Your full name" required />
+          </div>
+          <div>
+            <label for="apEmail">Email</label>
+            <input type="email" id="apEmail" placeholder="you@example.com" required />
+          </div>
+        </div>
+        <div class="grid">
+          <div>
+            <label for="apCity">City &amp; state (or country)</label>
+            <input type="text" id="apCity" placeholder="e.g. Fort Valley, GA" required />
+          </div>
+          <div>
+            <label for="apHand">Which hand will you take the test with?</label>
+            <select id="apHand" required>
+              <option value="">Choose…</option>
+              <option>Left hand</option>
+              <option>Right hand</option>
+              <option>I'll try both — left and right</option>
+            </select>
+          </div>
+        </div>
+        <label for="apCert">Certification path you're applying toward</label>
+        <select id="apCert">
+          <option>Academy certification — get certified, then certify others</option>
+          <option>The school being built — student entry</option>
+          <option>Not sure yet — advise me</option>
+        </select>
+        <label for="apWhy">Why are you applying? (a few lines)</label>
+        <textarea id="apWhy" placeholder="Tell administration why this scholarship, and what you'll do with the certification" required></textarea>
+
+        <h3 style="margin-top:20px">Step 2 — the $50 test fee, in Bitcoin <span class="pill demo">Demo payment — not live</span></h3>
+        <p>Your slip is generated when you press the button: <b style="color:var(--text)">$50.00 USD, payable in Bitcoin</b>, routed through FinSwap / Bitcoin the same way the other apps in this family take Bitcoin — <b style="color:var(--text)">demo-labeled until a live payment integration is in place</b>. No Bitcoin address is printed here, because no live payment address has been connected to this app yet — when it is, it will appear on the slip. Pay in FinSwap, then log your transaction ID below so administration can match your fee to your application.</p>
+        <div class="btn-row">
+          <button class="btn secondary" type="button" id="slipBtn">Generate my $50 fee slip</button>
+        </div>
+        <div class="output" id="slipOut" aria-live="polite"></div>
+        <label for="apTx">Bitcoin transaction ID for your $50 fee (from FinSwap / your wallet)</label>
+        <input type="text" id="apTx" placeholder="Paste the transaction ID after you pay — or leave blank and submit as fee-pending" />
+        <p class="field-help">Submitting without a transaction ID is fine — your application is logged as “Fee pending” and administration can see that status in the Back Office.</p>
+
+        <div class="btn-row">
+          <button class="btn" type="submit">Submit scholarship application</button>
+          <button class="btn secondary" type="button" id="appCopy" disabled>Copy my application</button>
+          <button class="btn secondary" type="button" id="appDownload" disabled>Download my application (.txt)</button>
+        </div>
+        <p class="status" id="appMsg" aria-live="polite"></p>
+      </form>
+      <div class="output" id="appOut" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <!-- ============ BACK OFFICE ============ -->
+  <section id="backoffice">
+    <div class="sec-head"><h2>Back Office</h2><span class="tag">Administration · Separate admin login</span></div>
+    <p class="sec-intro">The administration side of God's Eye — <strong>its own door, its own login, Jay's access</strong>. Members never see this side. Sign in as administrator above (demo: <code style="color:var(--gold-bright)">admin@demo.local</code> / <code style="color:var(--gold-bright)">AdminDemo2027</code>) and the office opens: scholarship decisions, video review, the HIIYAH inbox, the member list, and admin invites.</p>
+
+    <div class="card" id="officeLocked">
+      <h3>Back Office is locked <span class="pill stub">Admin only</span></h3>
+      <p>You're not signed in as an administrator. Use the Administrator Login in the Membership section — a member login will not open this office.</p>
+      <div class="btn-row"><button class="btn" type="button" data-jump="#membership">Go to Administrator Login</button></div>
+    </div>
+
+    <div id="officeOpen" class="hidden">
+      <div class="stat-grid" style="margin-bottom:14px">
+        <div class="stat"><div class="n" id="stMembers">0</div><div class="l">Members this session</div></div>
+        <div class="stat"><div class="n" id="stApps">0</div><div class="l">Scholarship applications</div></div>
+        <div class="stat"><div class="n" id="stVideos">0</div><div class="l">Videos in library</div></div>
+        <div class="stat"><div class="n" id="stMsgs">0</div><div class="l">HIIYAH messages</div></div>
+      </div>
+
+      <div class="card" style="margin-bottom:14px">
+        <h3>Scholarship applications <span class="pill wait" id="appsPill">0 waiting</span></h3>
+        <p>Every application from the form above lands here. Award = the applicant moves to the Excalibur test list for the $20,000 scholarship. Decisions are recorded for this session.</p>
+        <div id="adminApps"></div>
+        <div id="adminAppsLog"></div>
+      </div>
+
+      <div class="card" style="margin-bottom:14px">
+        <h3>HIIYAH inbox — member messages <span class="pill wait" id="inboxPill">0 unread</span></h3>
+        <p>Messages members sent from their accounts through HIIYAH. Reply here and the answer appears in that member's conversation thread on the HIIYAH section of this same app.</p>
+        <div class="chat-log" id="adminChatLog" style="max-height:260px"></div>
+        <form id="adminChatForm" autocomplete="off" style="margin-top:12px">
+          <label for="adminChatInput">Reply as Administration (via HIIYAH)</label>
+          <textarea id="adminChatInput" placeholder="Reply to your members…" required></textarea>
+          <div class="btn-row"><button class="btn" type="submit">Send reply via HIIYAH</button></div>
+          <p class="status" id="adminChatMsg" aria-live="polite"></p>
+        </form>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <h3>Video review</h3>
+          <p>Feature a video at the top of the library, or remove one. Every member-added video passes through here.</p>
+          <div id="adminVideos"></div>
+        </div>
+        <div class="card">
+          <h3>Members this session</h3>
+          <div id="adminMembers"></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:14px">
+        <h3>Admin invites — Jay approves every administrator</h3>
+        <p>Enter the approved person's name and email, generate the invite, and copy the invite message to send them yourself. In this demo the invite works on this page for this session — a live emailed invite arrives when the real account system connects.</p>
+        <form id="inviteForm" autocomplete="off">
+          <div class="grid">
+            <div>
+              <label for="invName">Approved person's name</label>
+              <input type="text" id="invName" placeholder="Full name" required />
+            </div>
+            <div>
+              <label for="invEmail">Their email</label>
+              <input type="email" id="invEmail" placeholder="them@example.com" required />
+            </div>
+          </div>
+          <div class="btn-row">
+            <button class="btn" type="submit">Generate invite</button>
+            <button class="btn secondary" type="button" id="invCopy" disabled>Copy invite message</button>
+          </div>
+          <p class="status" id="invMsg" aria-live="polite"></p>
+        </form>
+        <div class="output" id="invOut"></div>
+        <div class="btn-row"><button class="btn danger" type="button" id="adminOut">Sign out of Back Office</button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CONNECTED ============ -->
+  <section id="connected">
+    <div class="sec-head"><h2>All Apps Connected</h2><span class="tag">One compilation</span></div>
+    <p class="sec-intro">God's Eye does not stand alone. It is one app in a family — <strong>Excalibur Line, FinSwap, HIIYAH, Dominion Network, and PMI God's Eye</strong> — and every app connects to every other app: the same family is on this app, and this app is on theirs. All five are also in line for the <strong>Google Play Store</strong>, to submit the day Jay verifies the business paperwork.</p>
+    <div class="mesh-grid">
+      <div class="mesh-card">
+        <h3>PMIGodsEye — God's Eye</h3>
+        <div class="dom">pmigodseye.genesis</div>
+        <p>World view, member videos, HIIYAH admin talk, and the $20,000 scholarship &amp; Excalibur test — this app.</p>
+        <p><b style="color:var(--text)">Connects to →</b> Excalibur Line · FinSwap · HIIYAH · Dominion Network</p>
+      </div>
+      <div class="mesh-card">
+        <h3>Excalibur Line</h3>
+        <div class="dom">excaliburline.token</div>
+        <p>The elevated Line — Fort Valley · School · Factory · Sky Hub, and the home of the Excalibur test this scholarship is built on.</p>
+        <p><b style="color:var(--text)">Connects to →</b> God's Eye · FinSwap · HIIYAH · Dominion Network</p>
+      </div>
+      <div class="mesh-card">
+        <h3>FinSwap</h3>
+        <div class="dom">finswap.token</div>
+        <p>Exchange, gold &amp; Bitcoin on the Bitcoin blockchain — where the $50 scholarship test fee is paid in Bitcoin.</p>
+        <p><b style="color:var(--text)">Connects to →</b> God's Eye · Excalibur Line · HIIYAH · Dominion Network</p>
+      </div>
+      <div class="mesh-card">
+        <h3>HIIYAH</h3>
+        <div class="dom">Domain to be picked by Jay</div>
+        <p>Telecom — eSIM &amp; EarthNet. Inside God's Eye, HIIYAH is the working line between members and administrators.</p>
+        <p><b style="color:var(--text)">Connects to →</b> God's Eye · Excalibur Line · FinSwap · Dominion Network</p>
+      </div>
+      <div class="mesh-card">
+        <h3>Dominion Network</h3>
+        <div class="dom">dominionnetwork.metaverse</div>
+        <p>Media, chat &amp; streaming — in partnership with the CEO Network, Bahamas, with a stated reach goal of 134 countries including the U.S.</p>
+        <p><b style="color:var(--text)">Connects to →</b> God's Eye · Excalibur Line · FinSwap · HIIYAH</p>
+      </div>
+      <div class="mesh-card">
+        <h3>How the links stand</h3>
+        <p><b style="color:var(--text)">Live links:</b> Excalibur Line and FinSwap open today on their public links, from the sidebar.</p>
+        <p><b style="color:var(--text)">In this app:</b> HIIYAH runs here as the member-to-admin line. Dominion is carried in the compilation; its card will open its public link when the updated version is re-shared — no address has been invented for it.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ OPEN SOURCE ============ -->
+  <section id="opensource">
+    <div class="sec-head"><h2>GitHub &amp; Open Source</h2><span class="tag">What was pulled, what powers this</span></div>
+    <p class="sec-intro">Jay asked for God's Eye to be <strong>pulled from GitHub</strong> and rebuilt with <strong>proven open-source code</strong> so it is interactive instead of static. Here is exactly what that means for this build — checked against the repos, not guessed.</p>
+    <div class="grid">
+      <div class="card">
+        <h3>Pulled from Jay's GitHub — Gods-Eye-2</h3>
+        <p><a href="https://github.com/emperorjayel-ops/Gods-Eye-2" target="_blank" rel="noopener">github.com/emperorjayel-ops/Gods-Eye-2</a></p>
+        <p>Jay's own repo (checked 2026-11-23). What is in it today: the <b style="color:var(--text)">HIIYAH eSIM app</b> codebase (<code>hiiyah-esim-app/</code> — a store-ready telecom app built on open-source eSIM code), the repo README, and the Broker credit file. That HIIYAH codebase is why HIIYAH is the talk layer in this app: the repo Jay calls “the God's Eye situation” carries the family's telecom inside it.</p>
+        <p class="small">The repo's own honesty note travels with it: an app alone does not provision real eSIM profiles — that takes a carrier / white-label partner with a GSMA-certified SM-DP+ server. Same rule is honored in the HIIYAH section above.</p>
+      </div>
+      <div class="card">
+        <h3>Open-source code working in this page</h3>
+        <div class="kv"><span class="k">Leaflet 1.9.4 (BSD-2-Clause)</span><span class="v">The interactive World View map</span></div>
+        <div class="kv"><span class="k">OpenStreetMap (ODbL)</span><span class="v">Live map data under the Eye</span></div>
+        <div class="kv"><span class="k">Web Crypto — SHA-256 (browser standard)</span><span class="v">Password hashing for both login doors</span></div>
+        <div class="kv"><span class="k">getUserMedia / MediaDevices (browser standard)</span><span class="v">The real HIIYAH camera preview</span></div>
+        <div class="kv"><span class="k">God's Eye View — reference</span><span class="v"><a href="https://github.com/bilawalsidhu/gods-eye-view" target="_blank" rel="noopener">bilawalsidhu/gods-eye-view</a> — the open-source “God's Eye View” globe project this view is modeled on</span></div>
+        <div class="kv"><span class="k">OpenEUICC / EasyEUICC (GPLv3) — in Gods-Eye-2</span><span class="v">The eSIM LPA code inside Jay's repo</span></div>
+        <p class="small" style="margin-top:10px">Every feature above runs in this page right now — map, video adding and playback, member/admin accounts, HIIYAH text talk, scholarship application, and the back office queues. What is <b style="color:var(--text)">not</b> claimed: live HIIYAH calling and live Bitcoin payment — both wait on real service connections and are labeled where they appear.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ REPORT ============ -->
+  <section id="report">
+    <div class="sec-head"><h2>Report a Problem</h2><span class="tag">Fixes only on Jay's approval</span></div>
+    <div class="card">
+      <p>Something broken in God's Eye? Write it here. Your report is prepared as an email to <b style="color:var(--text)">goddessai@muse.ai</b> and also queued in the Back Office, where fixes wait for Jay's approval before anything changes.</p>
+      <form id="reportForm" autocomplete="off">
+        <label for="repWhere">Where is the problem?</label>
+        <select id="repWhere">
+          <option>World View map</option>
+          <option>Video Library</option>
+          <option>Membership / Login</option>
+          <option>HIIYAH talk</option>
+          <option>Scholarship application</option>
+          <option>Back Office</option>
+          <option>Somewhere else</option>
+        </select>
+        <label for="repText">What happened?</label>
+        <textarea id="repText" placeholder="Describe the problem" required></textarea>
+        <div class="btn-row">
+          <button class="btn" type="submit">Prepare report email</button>
+          <a class="btn secondary hidden" id="repMail" href="#" target="_blank" rel="noopener">Open the email to goddessai@muse.ai</a>
+        </div>
+        <p class="status" id="repMsg" aria-live="polite"></p>
+      </form>
+    </div>
+  </section>
+
+  <footer>
+    <p class="credit">Created by OPS' Broker · Shared by OPS' Broker</p>
+    <p>PMI God's Eye · pmigodseye.genesis · Signed: Broker AI</p>
+    <p>Interactive demo: accounts, videos, HIIYAH messages, scholarship applications, invites and reports live in this page's memory for this session only and are gone when it closes. The $50 test fee and any Bitcoin payment are demo-labeled until a live FinSwap / Bitcoin payment integration is connected. Live HIIYAH calling waits on the HIIYAH telecom partner connection. Detailed Excalibur test instructions will be added exactly as Jay sends them.</p>
+  </footer>
+
+  </div>
+  </main>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+(function(){
+"use strict";
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+function nowTime(){var d=new Date();return d.toLocaleTimeString([], {hour:"numeric",minute:"2-digit"});}
+function setStatus(id,msg,err){var el=$(id);if(!el)return;el.textContent=msg||"";el.className="status"+(err?" err":"");}
+
+/* ---------- State (session only, in memory) ---------- */
+var state={
+  members:[],            // {name,email,hash,role}
+  invites:[],            // {name,email,code}
+  videos:[],             // {id,title,desc,by,kind,src,featured}
+  messages:[],           // {from:'member'|'admin', who, text, when, read}
+  applications:[],       // {id,name,email,city,hand,cert,why,tx,status}
+  reports:[],
+  session:{member:null, admin:false},
+  seq:{video:0, app:0, report:0}
+};
+
+/* ---------- Password hashing (SHA-256, like the family apps) ---------- */
+function hashPass(pw){
+  if(window.crypto && crypto.subtle && crypto.subtle.digest){
+    return crypto.subtle.digest("SHA-256", new TextEncoder().encode("godseye::"+pw)).then(function(buf){
+      return Array.prototype.map.call(new Uint8Array(buf),function(b){return ("0"+b.toString(16)).slice(-2);}).join("");
+    });
+  }
+  var h=0,s="godseye::"+pw; for(var i=0;i<s.length;i++){h=((h<<5)-h+s.charCodeAt(i))|0;}
+  return Promise.resolve("fallback-"+h);
+}
+var DEMO_MEMBER={name:"Demo Member", email:"member@demo.local", pass:"EyeDemo2027", role:"member"};
+var DEMO_ADMIN={name:"Jay — Administrator", email:"admin@demo.local", pass:"AdminDemo2027", role:"admin"};
+Promise.all([hashPass(DEMO_MEMBER.pass), hashPass(DEMO_ADMIN.pass)]).then(function(h){
+  state.members.push({name:DEMO_MEMBER.name,email:DEMO_MEMBER.email,hash:h[0],role:"member",demo:true});
+  state.members.push({name:DEMO_ADMIN.name,email:DEMO_ADMIN.email,hash:h[1],role:"admin",demo:true});
+  renderAdminMembers();
+});
+
+/* ---------- Jump buttons ---------- */
+Array.prototype.forEach.call(document.querySelectorAll("[data-jump]"),function(b){
+  b.addEventListener("click",function(){
+    var t=document.querySelector(b.getAttribute("data-jump"));
+    if(t)t.scrollIntoView({behavior:"smooth",block:"start"});
+  });
+});
+
+/* ---------- WORLD VIEW (Leaflet) ---------- */
+var PLACES=[
+  {name:"Fort Valley — Headquarters", type:"home", lat:32.5538, lng:-83.8877, blurb:"Home ground. Headquarters of the family of apps, the Factory build, and the start of the Excalibur Line."},
+  {name:"The School — being built", type:"school", lat:32.5610, lng:-83.8950, blurb:"The school on the Line's route: Fort Valley → School → Factory → Sky Hub. The God's Eye scholarship sends students here."},
+  {name:"The Academy", type:"school", lat:32.5470, lng:-83.8790, blurb:"Where people get certified — and where the certified learn to certify others. Scholarship recipients enter through the Academy."},
+  {name:"The Factory", type:"home", lat:32.5380, lng:-83.9050, blurb:"The Factory going up in the Fort Valley countryside — watched by the Eye, served by the Line."},
+  {name:"Sky Hub", type:"network", lat:32.60, lng:-83.80, blurb:"The Line's sky station — where the elevated route, floating 20 feet over everything, meets the sky."},
+  {name:"Nassau, The Bahamas — Dominion Network", type:"network", lat:25.0443, lng:-77.3504, blurb:"Dominion Network in partnership with the CEO Network, with Hon. Dr. Deborah Bartlett — stated reach goal of 134 countries including the U.S."},
+  {name:"Las Vegas — Excalibur Connection", type:"network", lat:36.1699, lng:-115.1398, blurb:"The western end of the plan: Fort Valley → Illinois → Las Vegas, the connection the Founding Supporters are building."}
+];
+var map=null, markers=[];
+function renderPlaceCards(filter){
+  var list=$("placeList"); list.innerHTML="";
+  PLACES.forEach(function(p,i){
+    if(filter!=="all" && p.type!==filter) return;
+    var b=document.createElement("button");
+    b.type="button"; b.className="place";
+    b.innerHTML='<span class="pt">'+esc(p.type==="home"?"Home ground":p.type==="school"?"School & Academy":"The network")+'</span><b>'+esc(p.name)+'</b><p>'+esc(p.blurb)+'</p>';
+    b.addEventListener("click",function(){ flyTo(i); });
+    list.appendChild(b);
+  });
+}
+function flyTo(i){
+  var p=PLACES[i];
+  if(map){ map.flyTo([p.lat,p.lng], p.type==="network"&&p.lng<-100?5:11, {duration:1.2}); markers[i].openPopup(); }
+  setStatus("mapStatus","The Eye is on: "+p.name);
+}
+function initMap(){
+  renderPlaceCards("all");
+  if(!window.L){ setStatus("mapStatus","Map library couldn't load — the place cards below still work. Check your connection and reload for the live map.", true); return; }
+  map=L.map("eyeMap",{scrollWheelZoom:false}).setView([33,-84],4);
+  map.on("focus",function(){map.scrollWheelZoom.enable();});
+  map.on("blur",function(){map.scrollWheelZoom.disable();});
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:18, attribution:"© OpenStreetMap contributors"}).addTo(map);
+  PLACES.forEach(function(p){
+    var m=L.marker([p.lat,p.lng]).addTo(map);
+    m.bindPopup("<b>"+esc(p.name)+"</b><br>"+esc(p.blurb));
+    markers.push(m);
+  });
+  setStatus("mapStatus","Live map loaded — "+PLACES.length+" places under the Eye.");
+}
+if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",initMap);}else{initMap();}
+Array.prototype.forEach.call(document.querySelectorAll(".layer-btn"),function(b){
+  b.addEventListener("click",function(){
+    Array.prototype.forEach.call(document.querySelectorAll(".layer-btn"),function(x){x.classList.remove("active");});
+    b.classList.add("active");
+    var f=b.getAttribute("data-layer");
+    renderPlaceCards(f);
+    if(map){
+      markers.forEach(function(m,i){
+        var show=(f==="all"||PLACES[i].type===f);
+        if(show){ if(!map.hasLayer(m)) m.addTo(map); } else { if(map.hasLayer(m)) map.removeLayer(m); }
+      });
+      if(f==="home"||f==="school") map.flyTo([32.55,-83.89],11,{duration:1});
+      if(f==="network") map.flyTo([30,-95],3,{duration:1});
+      if(f==="all") map.flyTo([33,-84],4,{duration:1});
+    }
+  });
+});
+
+/* ---------- VIDEOS ---------- */
+function whoName(){ return state.session.member ? state.session.member.name : (state.session.admin ? "Administration" : "Guest"); }
+function videoEmbed(v){
+  if(v.kind==="youtube") return '<iframe src="https://www.youtube-nocookie.com/embed/'+esc(v.src)+'" title="'+esc(v.title)+'" allow="accelerometer; encrypted-media; picture-in-picture" allowfullscreen loading="lazy"></iframe>';
+  if(v.kind==="vimeo") return '<iframe src="https://player.vimeo.com/video/'+esc(v.src)+'" title="'+esc(v.title)+'" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen loading="lazy"></iframe>';
+  return '<video src="'+esc(v.src)+'" controls preload="metadata"></video>';
+}
+function renderVideos(){
+  var grid=$("videoGrid"); grid.innerHTML="";
+  var sorted=state.videos.slice().sort(function(a,b){return (b.featured?1:0)-(a.featured?1:0) || b.id-a.id;});
+  $("videoEmpty").style.display = sorted.length? "none":"block";
+  sorted.forEach(function(v){
+    var d=document.createElement("div"); d.className="video-card";
+    d.innerHTML='<div class="video-frame">'+videoEmbed(v)+'</div><div class="video-body"><b>'+esc(v.title)+(v.featured?' <span class="pill ok">Featured</span>':"")+'</b>'+(v.desc?'<p>'+esc(v.desc)+'</p>':"")+'<div class="by">Added by '+esc(v.by)+' · this session</div></div>';
+    grid.appendChild(d);
+  });
+  $("vidAs").textContent = state.session.member ? state.session.member.name+" (member)" : (state.session.admin ? "Administration" : "Guest (sign in to post as a member)");
+  renderAdminVideos(); updateStats(); updateDash();
+}
+function parseVideoUrl(url){
+  var yt=url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/);
+  if(yt) return {kind:"youtube", src:yt[1]};
+  var vm=url.match(/vimeo\.com\/(\d+)/);
+  if(vm) return {kind:"vimeo", src:vm[1]};
+  if(/\.(mp4|webm|ogg)(\?|#|$)/i.test(url)) return {kind:"file", src:url};
+  return null;
+}
+$("videoForm").addEventListener("submit",function(e){
+  e.preventDefault();
+  var title=$("vidTitle").value.trim();
+  var url=$("vidUrl").value.trim();
+  var file=$("vidFile").files && $("vidFile").files[0];
+  var desc=$("vidDesc").value.trim();
+  if(!title){ setStatus("vidMsg","Give the video a title first.", true); return; }
+  var parsed=null;
+  if(file){ parsed={kind:"file", src:URL.createObjectURL(file)}; }
+  else if(url){ parsed=parseVideoUrl(url); if(!parsed){ setStatus("vidMsg","That link isn't a YouTube, Vimeo, or direct video-file link I can play. Paste one of those — or choose a file.", true); return; } }
+  else { setStatus("vidMsg","Paste a video link or choose a video file.", true); return; }
+  state.videos.push({id:++state.seq.video, title:title, desc:desc, by:whoName(), kind:parsed.kind, src:parsed.src, featured:false});
+  $("vidTitle").value=""; $("vidUrl").value=""; $("vidFile").value=""; $("vidDesc").value="";
+  renderVideos();
+  setStatus("vidMsg","Added — your video is live in the library above and queued for admin review in the Back Office.");
+});
+$("vidSample").addEventListener("click",function(){
+  $("vidTitle").value="Sample — Big Buck Bunny (open movie)";
+  $("vidUrl").value="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4";
+  $("vidDesc").value="A sample direct-file video so you can see the player work. Replace it with your own link any time.";
+  setStatus("vidMsg","Sample filled in — press “Add to the library.”");
+});
+
+/* ---------- AUTH ---------- */
+function findMember(email){ email=(email||"").toLowerCase(); for(var i=0;i<state.members.length;i++){ if(state.members[i].email===email) return state.members[i]; } return null; }
+function refreshSessionUI(){
+  var m=state.session.member;
+  $("memberDash").classList.toggle("hidden", !m);
+  if(m){ $("memberName").textContent=m.name; }
+  $("officeLocked").classList.toggle("hidden", state.session.admin);
+  $("officeOpen").classList.toggle("hidden", !state.session.admin);
+  $("chatAs").textContent = m ? m.name+" (member)" : (state.session.admin ? "Administration" : "Guest");
+  renderVideos();
+}
+$("memberForm").addEventListener("submit",function(e){
+  e.preventDefault();
+  var email=$("mEmail").value.trim().toLowerCase(), pw=$("mPass").value;
+  var found=findMember(email);
+  if(!found){ setStatus("mMsg","No account matches that email — check it, or sign up below.", true); return; }
+  if(found.role==="admin"){ setStatus("mMsg","That's the administrator account — use the Administrator door, not Member Login.", true); return; }
+  hashPass(pw).then(function(h){
+    if(h!==found.hash){ setStatus("mMsg","Sign-in failed — check the password.", true); return; }
+    state.session.member=found;
+    setStatus("mMsg","Signed in — welcome, "+found.name+". Your dashboard is below.");
+    refreshSessionUI();
+  });
+});
+$("adminForm").addEventListener("submit",function(e){
+  e.preventDefault();
+  var email=$("aEmail").value.trim().toLowerCase(), pw=$("aPass").value;
+  var found=findMember(email);
+  if(!found || found.role!=="admin"){ setStatus("aMsg","No administrator account matches that email — admins join by Jay's invite.", true); return; }
+  hashPass(pw).then(function(h){
+    if(h!==found.hash){ setStatus("aMsg","Admin sign-in failed — check the password.", true); return; }
+    state.session.admin=true;
+    setStatus("aMsg","Signed in as administrator. The Back Office is open below.");
+    refreshSessionUI(); renderAdminApps(); renderAdminChat(); renderAdminVideos(); renderAdminMembers(); updateStats();
+    document.querySelector("#backoffice").scrollIntoView({behavior:"smooth"});
+  });
+});
+$("memberOut").addEventListener("click",function(){
+  state.session.member=null; setStatus("mMsg","Signed out."); refreshSessionUI();
+});
+$("adminOut").addEventListener("click",function(){
+  state.session.admin=false; setStatus("aMsg","Signed out of the Back Office."); refreshSessionUI();
+});
+$("suRole").addEventListener("change",function(){
+  $("inviteWrap").classList.toggle("hidden", $("suRole").value!=="admin");
+});
+$("signupForm").addEventListener("submit",function(e){
+  e.preventDefault();
+  var name=$("suName").value.trim(), email=$("suEmail").value.trim().toLowerCase(), pw=$("suPass").value, role=$("suRole").value;
+  if(!name||!email){ setStatus("suMsg","Name and email are both needed.", true); return; }
+  if(!pw||pw.length<6){ setStatus("suMsg","Choose a password of at least 6 characters.", true); return; }
+  if(findMember(email)){ setStatus("suMsg","An account with that email already exists — sign in instead.", true); return; }
+  if(role==="admin"){
+    var code=$("suInvite").value.trim();
+    var inv=null;
+    state.invites.forEach(function(iv){ if(iv.email===email && iv.code===code) inv=iv; });
+    if(!inv){ setStatus("suMsg","No matching invite — administrators need the exact invite code Jay sent to this email. Generate one in the Back Office (demo).", true); return; }
+  }
+  hashPass(pw).then(function(h){
+    var acct={name:name,email:email,hash:h,role:role};
+    state.members.push(acct);
+    setStatus("suMsg","Account created — "+(role==="admin"?"administrator":"member")+" account for "+name+". Sign in at the "+(role==="admin"?"Administrator":"Member")+" door above.");
+    $("suName").value=""; $("suEmail").value=""; $("suPass").value=""; if($("suInvite"))$("suInvite").value="";
+    renderAdminMembers(); updateStats();
+  });
+});
+function updateDash(){
+  if(!state.session.member) return;
+  var mine=state.videos.filter(function(v){return v.by===state.session.member.name;});
+  $("dashVideos").textContent = mine.length? mine.length+" video(s) — latest: "+mine[mine.length-1].title : "None yet — add one above";
+  var myMsgs=state.messages.filter(function(m){return m.from==="member";}).length;
+  $("dashMsgs").textContent = myMsgs? myMsgs+" sent — see the HIIYAH section" : "None yet";
+  var myApp=state.applications.length? "Application #GE-"+state.applications[state.applications.length-1].id+" — "+state.applications[state.applications.length-1].status : "Not started — apply below";
+  $("dashApp").textContent=myApp;
+}
+
+/* ---------- HIIYAH CHAT ---------- */
+function renderChat(){
+  function renderInto(el, asAdmin){
+    if(!el) return;
+    el.innerHTML="";
+    if(!state.messages.length){
+      el.innerHTML='<div class="chat-msg"><div class="who">God\'s Eye Administration</div><div class="what">Welcome to HIIYAH talk. Members: write below and administration will answer here. Admins: your inbox view is in the Back Office.</div></div>';
+      return;
+    }
+    state.messages.forEach(function(m){
+      var mine = asAdmin ? (m.from==="admin") : (m.from==="member");
+      var d=document.createElement("div"); d.className="chat-msg"+(mine?" me":"");
+      d.innerHTML='<div class="who">'+esc(m.who)+(m.from==="admin"?" · Administration":"")+'</div><div class="what">'+esc(m.text)+'</div><div class="when">'+esc(m.when)+' · via HIIYAH</div>';
+      el.appendChild(d);
+    });
+    el.scrollTop=el.scrollHeight;
+  }
+  renderInto($("chatLog"), false);
+  renderInto($("adminChatLog"), true);
+  updateStats();
+  var unread=state.messages.filter(function(m){return m.from==="member" && !m.read;}).length;
+  $("inboxPill").textContent=unread+" unread";
+  $("inboxPill").className="pill "+(unread?"wait":"ok");
+  updateDash();
+}
+$("chatForm").addEventListener("submit",function(e){
+  e.preventDefault();
+  var text=$("chatInput").value.trim(); if(!text) return;
+  state.messages.push({from:"member", who:whoName(), text:text, when:nowTime(), read:false});
+  $("chatInput").value="";
+  renderChat();
+  setStatus("chatMsg","Sent via HIIYAH — it's in the administrator's inbox in the Back Office now. Sign in as admin to answer it and watch the reply land here.");
+});
+$("chatQuick").addEventListener("click",function(){ $("chatInput").value="Checking in from my membership account — please let me know you're seeing this on HIIYAH."; $("chatInput").focus(); });
+$("adminChatForm").addEventListener("submit",function(e){
+  e.preventDefault();
+  var text=$("adminChatInput").value.trim(); if(!text) return;
+  state.messages.forEach(function(m){ m.read=true; });
+  state.messages.push({from:"admin", who:"God's Eye Administration", text:text, when:nowTime(), read:true});
+  $("adminChatInput").value="";
+  renderChat();
+  setStatus("adminChatMsg","Reply sent via HIIYAH — it's in the member's conversation thread now.");
+});
+
+/* ---------- CAMERA (real, on-device) ---------- */
+var camStream=null;
+$("camOn").addEventListener("click",function(){
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){ setStatus("camMsg","This browser doesn't expose a camera here — text talk above still works.", true); return; }
+  navigator.mediaDevices.getUserMedia({video:true, audio:false}).then(function(stream){
+    camStream=stream;
+    var v=$("camVideo"); v.srcObject=stream; v.style.display="block";
+    $("camPlaceholder").style.display="none";
+    $("camOn").disabled=true; $("camOff").disabled=false;
+    setStatus("camMsg","Camera on — this is your own preview, on your own device. Nothing is recorded or sent.");
+  }).catch(function(){
+    setStatus("camMsg","Camera didn't open — the browser or device didn't allow it. Text talk above still works.", true);
+  });
+});
+$("camOff").addEventListener("click",function(){
+  if(camStream){ camStream.getTracks().forEach(function(t){t.stop();}); camStream=null; }
+  var v=$("camVideo"); v.srcObject=null; v.style.display="none";
+  $("camPlaceholder").style.display="block";
+  $("camOn").disabled=false; $("camOff").disabled=true;
+  setStatus("camMsg","Camera off.");
+});
+
+/* ---------- SCHOLARSHIP APPLICATION ---------- */
+var lastAppText="";
+function appSummary(a){
+  return "PMI GOD'S EYE — $20,000 SCHOLARSHIP APPLICATION\n"+
+  "Domain: pmigodseye.genesis\n"+
+  "Application #: GE-"+a.id+"\n"+
+  "Name: "+a.name+"\nEmail: "+a.email+"\nCity: "+a.city+"\n"+
+  "Test hand: "+a.hand+"\nPath: "+a.cert+"\n"+
+  "Why: "+a.why+"\n"+
+  "Test fee: $50.00 USD in Bitcoin (demo payment — not live)\n"+
+  "Bitcoin transaction ID: "+(a.tx||"Not provided — fee pending")+"\n"+
+  "Status: "+a.status+"\n"+
+  "Note: The God's Eye test (Excalibur test) — activate the device with the left or right hand. Detailed test instructions to be added as Jay sends them. Scholarship worth $20,000 awarded to applicants who can activate the device.";
+}
+$("slipBtn").addEventListener("click",function(){
+  var name=$("apName").value.trim()||"(your name)";
+  $("slipOut").textContent="PAYMENT SLIP — GOD'S EYE TEST FEE (DEMO — NOT LIVE)\n"+
+  "Pay: $50.00 USD in Bitcoin\n"+
+  "For: God's Eye test (Excalibur test) — scholarship application fee\n"+
+  "Applicant: "+name+"\n"+
+  "Route: FinSwap / Bitcoin — the same Bitcoin route as Jay's other apps\n"+
+  "Status: Demo slip. No live payment address is connected to this app yet, so no address is printed here. When the live FinSwap/Bitcoin integration connects, the address appears on this slip.\n"+
+  "After paying in FinSwap, paste your transaction ID in the field below and submit your application.";
+});
+$("appForm").addEventListener("submit",function(e){
+  e.preventDefault();
+  var a={
+    id:++state.seq.app,
+    name:$("apName").value.trim(), email:$("apEmail").value.trim().toLowerCase(),
+    city:$("apCity").value.trim(), hand:$("apHand").value, cert:$("apCert").value,
+    why:$("apWhy").value.trim(), tx:$("apTx").value.trim(),
+    status:"Submitted — waiting on admin review"
+  };
+  if(!a.name||!a.email||!a.city||!a.hand||!a.why){ setStatus("appMsg","Fill in every field — name, email, city, test hand, and why you're applying.", true); return; }
+  state.applications.unshift(a);
+  lastAppText=appSummary(a);
+  $("appOut").textContent=lastAppText;
+  $("appCopy").disabled=false; $("appDownload").disabled=false;
+  setStatus("appMsg","Application GE-"+a.id+" submitted — it's in the Back Office review queue now"+(a.tx? ", with your fee transaction logged." : " as fee-pending (no transaction ID yet)."));
+  renderAdminApps(); updateStats(); updateDash();
+});
+$("appCopy").addEventListener("click",function(){
+  if(!lastAppText) return;
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(lastAppText).then(function(){ setStatus("appMsg","Application copied — keep it with your records."); },function(){ setStatus("appMsg","Copy didn't work in this browser — use Download instead.", true); });
+  } else setStatus("appMsg","Copy isn't available in this browser — use Download instead.", true);
+});
+$("appDownload").addEventListener("click",function(){
+  if(!lastAppText) return;
+  var blob=new Blob([lastAppText],{type:"text/plain"});
+  var a=document.createElement("a");
+  a.href=URL.createObjectURL(blob); a.download="godseye-scholarship-application.txt";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){URL.revokeObjectURL(a.href);},2000);
+});
+
+/* ---------- BACK OFFICE ---------- */
+function updateStats(){
+  $("stMembers").textContent=state.members.length;
+  $("stApps").textContent=state.applications.length;
+  $("stVideos").textContent=state.videos.length;
+  $("stMsgs").textContent=state.messages.length;
+}
+function renderAdminApps(){
+  var q=$("adminApps"); if(!q) return;
+  var waiting=state.applications.filter(function(a){return a.status.indexOf("waiting")>-1;});
+  $("appsPill").textContent=waiting.length+" waiting";
+  $("appsPill").className="pill "+(waiting.length?"wait":"ok");
+  q.innerHTML="";
+  if(!state.applications.length){ q.innerHTML='<p style="color:var(--muted)">No applications yet this session — they land here the moment someone applies.</p>'; }
+  state.applications.forEach(function(a){
+    var d=document.createElement("div"); d.className="queue-item";
+    d.innerHTML="<b>GE-"+a.id+" · "+esc(a.name)+'</b> <span class="pill '+(a.status.indexOf("Awarded")===0?"ok":a.status.indexOf("Declined")===0?"bad":"wait")+'">'+esc(a.status)+'</span>'+
+      "<p>"+esc(a.email)+" · "+esc(a.city)+" · Test hand: "+esc(a.hand)+"\n"+esc(a.cert)+"\nFee tx: "+esc(a.tx||"Not provided — fee pending")+"\nWhy: "+esc(a.why)+"</p>";
+    if(a.status.indexOf("waiting")>-1){
+      var row=document.createElement("div"); row.className="qactions";
+      var b1=document.createElement("button"); b1.type="button"; b1.className="btn small"; b1.textContent="Award — move to Excalibur test list";
+      b1.addEventListener("click",function(){ a.status="Awarded — on the Excalibur test list"; renderAdminApps(); updateDash(); });
+      var b2=document.createElement("button"); b2.type="button"; b2.className="btn small danger"; b2.textContent="Decline";
+      b2.addEventListener("click",function(){ a.status="Declined by administration"; renderAdminApps(); updateDash(); });
+      row.appendChild(b1); row.appendChild(b2); d.appendChild(row);
+    }
+    q.appendChild(d);
+  });
+}
+function renderAdminVideos(){
+  var q=$("adminVideos"); if(!q) return;
+  q.innerHTML="";
+  if(!state.videos.length){ q.innerHTML='<p style="color:var(--muted)">No videos yet this session.</p>'; return; }
+  state.videos.forEach(function(v){
+    var d=document.createElement("div"); d.className="queue-item";
+    d.innerHTML="<b>"+esc(v.title)+"</b><p>By "+esc(v.by)+" · "+esc(v.kind)+(v.featured?" · Featured":"")+"</p>";
+    var row=document.createElement("div"); row.className="qactions";
+    var bf=document.createElement("button"); bf.type="button"; bf.className="btn small secondary"; bf.textContent=v.featured?"Unfeature":"Feature";
+    bf.addEventListener("click",function(){ v.featured=!v.featured; renderVideos(); });
+    var br=document.createElement("button"); br.type="button"; br.className="btn small danger"; br.textContent="Remove";
+    br.addEventListener("click",function(){ state.videos=state.videos.filter(function(x){return x.id!==v.id;}); renderVideos(); });
+    row.appendChild(bf); row.appendChild(br); d.appendChild(row);
+    q.appendChild(d);
+  });
+}
+function renderAdminMembers(){
+  var q=$("adminMembers"); if(!q) return;
+  q.innerHTML="";
+  if(!state.members.length){ q.innerHTML='<p style="color:var(--muted)">No members yet.</p>'; return; }
+  state.members.forEach(function(m){
+    var d=document.createElement("div"); d.className="kv";
+    d.innerHTML='<span class="k">'+esc(m.name)+(m.demo?" (demo)":"")+'</span><span class="v">'+esc(m.role)+" · "+esc(m.email)+"</span>";
+    q.appendChild(d);
+  });
+}
+function renderAdminChat(){ renderChat(); }
+var lastInviteText="";
+$("inviteForm").addEventListener("submit",function(e){
+  e.preventDefault();
+  var name=$("invName").value.trim(), email=$("invEmail").value.trim().toLowerCase();
+  if(!name||!email){ setStatus("invMsg","Name and email are both needed.", true); return; }
+  var code="GE-"+Math.random().toString(36).slice(2,8).toUpperCase();
+  state.invites.push({name:name,email:email,code:code});
+  lastInviteText="You're invited to administer PMI God's Eye (pmigodseye.genesis).\n\nHi "+name+" — Jay has approved you as an administrator.\n\n1. Open PMI God's Eye and go to Sign Up.\n2. Use this exact email: "+email+"\n3. Choose “Administrator (invited)” and enter this invite code: "+code+"\n4. Then sign in at the Administrator door.\n\n— God's Eye Administration (demo invite — works in this session's page)";
+  $("invOut").textContent=lastInviteText;
+  $("invCopy").disabled=false;
+  setStatus("invMsg","Invite generated for "+name+" — copy the message and send it yourself.");
+});
+$("invCopy").addEventListener("click",function(){
+  if(!lastInviteText) return;
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(lastInviteText).then(function(){ setStatus("invMsg","Invite message copied."); },function(){ setStatus("invMsg","Copy didn't work — select the text in the box and copy it manually.", true); });
+  }
+});
+
+/* ---------- REPORT ---------- */
+$("reportForm").addEventListener("submit",function(e){
+  e.preventDefault();
+  var where=$("repWhere").value, text=$("repText").value.trim();
+  if(!text){ setStatus("repMsg","Describe the problem first.", true); return; }
+  var id=++state.seq.report;
+  state.reports.push({id:id,where:where,text:text,status:"Pending Jay's approval"});
+  var body="Problem report #"+id+" — PMI God's Eye (pmigodseye.genesis)\nWhere: "+where+"\nWhat happened: "+text+"\nReported by: "+whoName()+"\nStatus: Pending Jay's approval — fixes only on Jay's approval.";
+  var link=$("repMail");
+  link.href="mailto:goddessai@muse.ai?subject="+encodeURIComponent("PMI God's Eye — problem report #"+id+" ("+where+")")+"&body="+encodeURIComponent(body);
+  link.classList.remove("hidden");
+  setStatus("repMsg","Report #"+id+" prepared and queued in the Back Office as “Pending Jay's approval.” Tap the email button to send it to goddessai@muse.ai.");
+  $("repText").value="";
+});
+
+/* ---------- Init ---------- */
+renderVideos(); renderChat(); renderAdminApps(); updateStats();
+})();
+</script>
+</body>
+</html>
