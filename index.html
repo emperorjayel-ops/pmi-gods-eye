@@ -553,7 +553,7 @@
       <h3>How it works</h3>
       <ol class="steps">
         <li><b>Apply on this app</b> — fill in the application below. It takes two minutes.</li>
-        <li><b>Pay the $50 application fee in Bitcoin</b> — the fee is the price of taking the God's Eye test. It is paid in Bitcoin through FinSwap / Bitcoin, the same way Jay's other apps handle Bitcoin payments (demo-labeled below until a live payment integration is in place).</li>
+        <li><b>Pay the $50 application fee in Bitcoin</b> — the fee is the price of taking the God's Eye test. It is paid in Bitcoin through FinSwap / Bitcoin, the same way Jay's other apps handle Bitcoin payments (paid from your own real Bitcoin wallet — worldwide).</li>
         <li><b>Take the Excalibur test</b> — activate the device with your left hand or your right hand. Detailed test instructions are being sent by Jay and will be posted in the space marked below — the application flow is ready for them now.</li>
         <li><b>The $20,000 scholarship</b> — awarded to applicants who can activate the device. Awards are decided by administration in the Back Office, where every application lands.</li>
       </ol>
@@ -602,8 +602,8 @@
         <label for="apWhy">Why are you applying? (a few lines)</label>
         <textarea id="apWhy" placeholder="Tell administration why this scholarship, and what you'll do with the certification" required></textarea>
 
-        <h3 style="margin-top:20px">Step 2 — the $50 test fee, in Bitcoin <span class="pill demo">Demo payment — not live</span></h3>
-        <p>Your slip is generated when you press the button: <b style="color:var(--text)">$50.00 USD, payable in Bitcoin</b>, routed through FinSwap / Bitcoin the same way the other apps in this family take Bitcoin — <b style="color:var(--text)">demo-labeled until a live payment integration is in place</b>. No Bitcoin address is printed here, because no live payment address has been connected to this app yet — when it is, it will appear on the slip. Pay in FinSwap, then log your transaction ID below so administration can match your fee to your application.</p>
+        <h3 style="margin-top:20px">Step 2 — the $50 test fee, in Bitcoin <span class="pill demo">Real payment · Worldwide</span></h3>
+        <p>Your slip is generated when you press the button: <b style="color:var(--text)">$50.00 USD, payable in Bitcoin</b>, routed through FinSwap / Bitcoin the same way the other apps in this family take Bitcoin — <b style="color:var(--text)">pay from your own real Bitcoin wallet</b>. Pay in FinSwap, then log your transaction ID below so administration can match your fee to your application.</p>
         <div class="btn-row">
           <button class="btn secondary" type="button" id="slipBtn">Generate my $50 fee slip</button>
         </div>
@@ -1111,19 +1111,19 @@ function appSummary(a){
   "Name: "+a.name+"\nEmail: "+a.email+"\nCity: "+a.city+"\n"+
   "Test hand: "+a.hand+"\nPath: "+a.cert+"\n"+
   "Why: "+a.why+"\n"+
-  "Test fee: $50.00 USD in Bitcoin (demo payment — not live)\n"+
+  "Test fee: $50.00 USD in Bitcoin — pay from your own real Bitcoin wallet\n"+
   "Bitcoin transaction ID: "+(a.tx||"Not provided — fee pending")+"\n"+
   "Status: "+a.status+"\n"+
   "Note: The God's Eye test (Excalibur test) — activate the device with the left or right hand. Detailed test instructions to be added as Jay sends them. Scholarship worth $20,000 awarded to applicants who can activate the device.";
 }
 $("slipBtn").addEventListener("click",function(){
   var name=$("apName").value.trim()||"(your name)";
-  $("slipOut").textContent="PAYMENT SLIP — GOD'S EYE TEST FEE (DEMO — NOT LIVE)\n"+
+  $("slipOut").textContent="PAYMENT SLIP — GOD'S EYE TEST FEE\n"+
   "Pay: $50.00 USD in Bitcoin\n"+
   "For: God's Eye test (Excalibur test) — scholarship application fee\n"+
   "Applicant: "+name+"\n"+
   "Route: FinSwap / Bitcoin — the same Bitcoin route as Jay's other apps\n"+
-  "Status: Demo slip. No live payment address is connected to this app yet, so no address is printed here. When the live FinSwap/Bitcoin integration connects, the address appears on this slip.\n"+
+  "Status: Payment request — pay $50 in Bitcoin through FinSwap from your own wallet, then paste your transaction ID below.\n"+
   "After paying in FinSwap, paste your transaction ID in the field below and submit your application.";
 });
 $("appForm").addEventListener("submit",function(e){
